@@ -30,6 +30,11 @@ class MyHash(object):
         return True
 
     def _set_helper(self, key, value, num_iters):
+        """
+        Recursively try to set key to value in the dictionary using cuckoo
+        hashing to resolve conflicts, and return True on success and the 
+        unset key and value on failure.
+        """
         if num_iters > self._max_path_size:
             return key, value
         else:
@@ -45,6 +50,10 @@ class MyHash(object):
             return self._set_helper(slot_key, slot_val, num_iters + 1)
 
     def _rehash(self, unset_key, unset_value):
+        """
+        Generate new hash functions and try to rehash all values. Keeps on
+        generating new hashes until a working set is found.
+        """
         self._random_nums = self._get_new_random_nums()
         result = self._set_helper(unset_key, unset_value, 0)
         if result is not True:
@@ -83,6 +92,7 @@ class MyHash(object):
             return val
 
     def _find_pair(self, key):
+        """Return the index of key in the array or "not found" if not found."""
         indices = self._get_hashes(key)
         for i in indices:
             slot_key, slot_val = self.array[i]
@@ -117,13 +127,9 @@ class MyHash(object):
 
     #TODO: better hash function?
     def _get_hashes(self, string):
+        """Return a list of each hash applied to the input string."""
         return [self._get_hash(string + str(i)) for i in self._random_nums]
 
     def _get_new_random_nums(self):
+        """Generate new random numbers to be used in the hash functions."""
         return [randint(-1000, 1000) for _ in range(self._num_hashes)]
-
-if __name__ == "__main__":
-    h = MyHash(20)
-    for i in range(16):
-        h.set('key' + str(i), i)
-    print '-----------------------------------------'
