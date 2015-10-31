@@ -20,50 +20,60 @@ class MyHash(object):
         self._random_nums = self._get_new_random_nums()
 
     def set(self, key, value):
-        """Set key and value and return True on success, False on failure."""
+        return self._set(key, value, increment_nitems=True)
+
+    def _set(self, key, value, increment_nitems):
+        """Add key value pair and return True on success, False on failure."""
         self._assert_valid_key(key)
-        result = self._set_helper(key, value, 0)
-        if result is not True:
-            # we couldn't find a free slot after maximum number of iterations
-            self._rehash(*result)
+        set_result = self._set_helper(key, value, 0)
+        if set_result is not True:
+            # the set did not succeed, so we rehash the table with new hashes
+            self._rehash(*set_result)
         self.nitems += 1
         return True
 
     def _set_helper(self, key, value, num_iters):
         """
-        Recursively try to set key to value in the dictionary using cuckoo
-        hashing to resolve conflicts, and return True on success and the 
+        Recursively try to add key value pair to dictionary in under
+        _max_path_size number of steps, and return True on success and the 
         unset key and value on failure.
         """
         if num_iters > self._max_path_size:
             return key, value
         else:
             array_indices = self._get_hashes(key)
-            for i in array_indices:
-                slot_key, slot_val = self.array[i]
-                if slot_key is None or slot_key == key: # slot was not taken
-                    self.array[i] = key, value
-                    return True    
-            # slot was taken, push out first slot
-            (slot_key, slot_val), self.array[array_indices[0]] = \
-                                    self.array[array_indices[0]], (key, value)
-            return self._set_helper(slot_key, slot_val, num_iters + 1)
+            if self._add_to_free_slot(key, value, array_indices) == "success":
+                return True
+            else: 
+                # set the array at the first hash of the key to key value pair
+                # and recursively re set the pair that was bumped out
+                (slot_key, slot_val), self.array[array_indices[0]] = \
+                                        self.array[array_indices[0]], (key, value)
+                return self._set_helper(slot_key, slot_val, num_iters + 1)
+
+    def _add_to_free_slot(self, key, value, array_indices):
+        """Attempt to add key value without moving any previous pairs."""
+        for i in array_indices:
+            slot_key, slot_val = self.array[i]
+            # Check if slot is empty or if given key has already been set
+            # to allow overwriting of keys
+            if slot_key is None or slot_key == key:
+                self.array[i] = key, value
+                return "success"  
+        return "failure"  
 
     def _rehash(self, unset_key, unset_value):
         """
-        Generate new hash functions and try to rehash all values. Keeps on
-        generating new hashes until a working set is found.
+        Take a key value pair not yet in the dictionary and generate new 
+        hash functions until all key value pairs including the input can be
+        added to the table without collisions.
         """
         self._random_nums = self._get_new_random_nums()
-        result = self._set_helper(unset_key, unset_value, 0)
-        if result is not True:
-            self._rehash(*result)
+        self._set(unset_key, unset_value, increment_nitems=False)
         for index, (key, value) in enumerate(self.array):
             if key is not None and index not in self._get_hashes(key):
                 self.array[index] = (None, None)
-                result = self._set_helper(key, value, 0)
-                if result is not True:
-                    self._rehash(*result)
+                self._set(key, value, increment_nitems=False)
 
     def get(self, key):
         """
@@ -71,16 +81,13 @@ class MyHash(object):
         otherwise.
         """
         array_index = self._find_pair(key)
-        if array_index == "not found":
-            return None
-        else:
-            return self.array[array_index][1]
+        return None if array_index == "not found" else self.array[array_index][1]
 
     #TODO: maybe sacrifice conciseness for readability here?
     def delete(self, key):
         """
         Delete key from hash map and return the associated value on success,
-        or None on failure.
+        and None on failure.
         """
         array_index = self._find_pair(key)
         if array_index == "not found":
