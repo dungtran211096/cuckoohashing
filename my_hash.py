@@ -5,7 +5,7 @@ from numbers import Number
 from random import randint
 #TODO run linter/make sure style is fine
 #TODO peer review (Rohan)?
-#TODO choose better default value?
+#TODO choose better default value? (or make it variable)
 class MyHash(object):
     """Custom hash map which handles collisions using Cuckoo Hashing."""
     def __init__(self, size):
@@ -16,22 +16,26 @@ class MyHash(object):
         self.array = [(None, None)] * int(size)
 
         self._num_hashes = 3
-        self._max_path_size = 100
-        self._random_nums = self._get_random_nums()
+        self._max_path_size = 20
+        # self._random_nums = self._get_new_random_nums()
+        self._random_nums = [489, 806, -838]
 
-    #TODO: should be able to re set a value with same key
     def set(self, key, value):
         """Set key and value and return True on success, False on failure."""
         self._assert_valid_key(key)
         result = self._set_helper(key, value, 0)
-        if result is False:
+        if result is not True:
             # we couldn't find a free slot after maximum number of iterations
-            self._rehash()
+            self._rehash(*result)
+        self.nitems += 1
         return True
 
     def _set_helper(self, key, value, num_iters):
+        print 'setting {0}, {1}'.format(key, str(value))
+        print h.array
+        print 
         if num_iters > self._max_path_size:
-            return False
+            return key, value
         else:
             array_indices = self._get_hashes(key)
             for i in array_indices:
@@ -40,25 +44,31 @@ class MyHash(object):
                     self.array[i] = key, value
                     return True    
             # slot was taken, push out first slot
-            (slot_key, slot_val), self.array[array_indices[0]] = self.array[arra_indices[0]], (key, value)
-            self._set_helper(slot_key, slot_val, num_iters + 1)
+            (slot_key, slot_val), self.array[array_indices[0]] = \
+                                    self.array[array_indices[0]], (key, value)
+            return self._set_helper(slot_key, slot_val, num_iters + 1)
 
-    def _rehash(self):
-        self.hashes = self._get_new_hashes()
-        for key, value in array:
-            if key is not None:
-                self.set(key, value)
+    def _rehash(self, unset_key, unset_value):
+        self._random_nums = self._get_new_random_nums()
+        if not self._set_helper(unset_key, unset_value, 0):
+            self._rehash(unset_key, unset_value)
+        for index, (key, value) in enumerate(self.array):
+            if key is not None and index not in self._get_hashes(key):
+                result = self._set_helper(key, value, 0)
+                if result is not True:
+                    self._rehash(*result)
+                self.array[index] = (None, None)
 
     def get(self, key):
         """
         Return value associated with input key if it has been set, None
         otherwise.
         """
-        index = self._get_hash(key)
-        if self._already_defined(index):
-            return self.array[index]
-        else: # no value was set for given key
+        array_index = self._find_pair(key)
+        if array_index == "not found":
             return None
+        else:
+            return self.array[array_index][1]
 
     #TODO: maybe sacrifice conciseness for readability here?
     def delete(self, key):
@@ -66,18 +76,26 @@ class MyHash(object):
         Delete key from hash map and return the associated value on success,
         or None on failure.
         """
-        index = self._get_hash(key)
-        value, self.array[index] = self.array[index], None
-        self.nitems = self.nitems - 1 if value is not None else self.nitems
-        return value
+        array_index = self._find_pair(key)
+        if array_index == "not found":
+            return None
+        else:
+            self.nitems -= 1
+            (key, val), self.array[array_index] = \
+                                        self.array[array_index], (None, None)
+            return val
+
+    def _find_pair(self, key):
+        indices = self._get_hashes(key)
+        for i in indices:
+            slot_key, slot_val = self.array[i]
+            if slot_key == key:
+                return i
+        return "not found"
 
     def load(self):
         """Return the current load of the hash map."""
         return float(self.nitems) / self.size
-
-    def _already_defined(self, index):
-        """Return True if hash map is already defined at given index, else False."""
-        return self.array[index] is not None
 
     @classmethod
     def _assert_valid_key(cls, key):
@@ -104,5 +122,11 @@ class MyHash(object):
     def _get_hashes(self, string):
         return [self._get_hash(string + str(i)) for i in self._random_nums]
 
-    def _get_random_nums(self):
+    def _get_new_random_nums(self):
         return [randint(-1000, 1000) for _ in range(self._num_hashes)]
+
+if __name__ == "__main__":
+    h = MyHash(20)
+    for i in range(16):
+        h.set('key' + str(i), i)
+    print '-----------------------------------------'

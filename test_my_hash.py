@@ -57,10 +57,17 @@ class TestMyHashSetGet(unittest.TestCase):
 		#not string key, full hash_map
 
 	def _bulk_set(self, hash_map, nitems):
-		return [hash_map.set("key" + str(i), i) for i in range(1, nitems)]
+		l = []
+		for i in range(1, nitems):
+			for j in range(20):
+				print hash_map.array[j]
+			print
+			l.append(hash_map.set("key" + str(i), i))
+		return l
+		# return [hash_map.set("key" + str(i), i) for i in range(1, nitems)]
 
 	def _bulk_get(self, hash_map, nitems):
-		return [hash_map.get("key" + str(i) for i in range(1, nitems))]
+		return [hash_map.get("key" + str(i)) for i in range(1, nitems)]
 
 
 class TestMyHashDelete(unittest.TestCase):
