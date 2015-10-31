@@ -61,6 +61,11 @@ class TestCuckooHashSetGet(unittest.TestCase):
 		self._bulk_set(self.small_hash_map, 20)
 		self.assertFalse(self.small_hash_map.set('20th item', 5))
 
+	def test_set_overwrite(self):
+		self.small_hash_map.set('somekey', 0)
+		self.assertTrue(self.small_hash_map.set('somekey', 1))
+		self.assertEqual(1, self.small_hash_map.get('somekey'))
+
 	def _bulk_set(self, hash_map, nitems):
 		return [hash_map.set("key" + str(i), i) for i in range(nitems)]
 
