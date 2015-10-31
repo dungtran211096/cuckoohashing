@@ -80,25 +80,24 @@ class MyHash(object):
         Return value associated with input key if it has been set, None
         otherwise.
         """
-        array_index = self._find_pair(key)
+        array_index = self._find_array_index(key)
         return None if array_index == "not found" else self.array[array_index][1]
 
-    #TODO: maybe sacrifice conciseness for readability here?
     def delete(self, key):
         """
         Delete key from hash map and return the associated value on success,
         and None on failure.
         """
-        array_index = self._find_pair(key)
+        array_index = self._find_array_index(key)
         if array_index == "not found":
             return None
         else:
             self.nitems -= 1
-            (key, val), self.array[array_index] = \
+            (_, val), self.array[array_index] = \
                                         self.array[array_index], (None, None)
             return val
 
-    def _find_pair(self, key):
+    def _find_array_index(self, key):
         """Return the index of key in the array or "not found" if not found."""
         indices = self._get_hashes(key)
         for i in indices:
