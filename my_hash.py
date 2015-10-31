@@ -30,9 +30,6 @@ class MyHash(object):
         return True
 
     def _set_helper(self, key, value, num_iters):
-        print 'setting {0}, {1}'.format(key, str(value))
-        print h.array
-        print 
         if num_iters > self._max_path_size:
             return key, value
         else:
