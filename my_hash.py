@@ -19,18 +19,45 @@ class MyHash(object):
         self._max_path_size = size
         self._random_nums = self._get_new_random_nums()
 
+    def _assert_valid_size(self, size):
+        """Raise appropriate error if input is not a natural number."""
+        if not isinstance(size, Number):
+            raise TypeError("Size must be a valid integer")
+        elif size < 0 or int(size) != size:
+            raise ValueError("Size must be non negative")
+
     def set(self, key, value):
+        """Add key value pair and increment number of items in dictionary."""
         return self._set(key, value, increment_nitems=True)
 
     def _set(self, key, value, increment_nitems):
         """Add key value pair and return True on success, False on failure."""
         self._assert_valid_key(key)
+        self._assert_valid_value(value)
+        if self._is_full():
+            return False
         set_result = self._set_helper(key, value, 0)
         if set_result is not True:
             # the set did not succeed, so we rehash the table with new hashes
             self._rehash(*set_result)
         self.nitems += 1
         return True
+
+    @classmethod
+    def _assert_valid_key(cls, key):
+        """Raise TypeError if the input is not a valid key."""
+        if not isinstance(key, str):
+            raise TypeError("Keys must be strings.")
+
+    @classmethod
+    def _assert_valid_value(cls, value):
+        """Raise TypeError if value is None."""
+        if value is None:
+            raise TypeError("dictionary values can't be None.")
+
+    def _is_full(self):
+        """Return True if the hash map is full, False otherwise."""
+        return self.nitems == self.size
 
     def _set_helper(self, key, value, num_iters):
         """
@@ -75,6 +102,10 @@ class MyHash(object):
                 self.array[index] = (None, None)
                 self._set(key, value, increment_nitems=False)
 
+    def _get_new_random_nums(self):
+        """Generate new random numbers to be used in the hash functions."""
+        return [randint(-1000, 1000) for _ in range(self._num_hashes)]
+
     def get(self, key):
         """
         Return value associated with input key if it has been set, None
@@ -103,36 +134,14 @@ class MyHash(object):
         matches = filter(lambda i: self.array[i][0] == key, indices)
         return matches[0] if matches else "not found"
 
-    def load(self):
-        """Return the current load of the hash map."""
-        return float(self.nitems) / self.size
-
-    @classmethod
-    def _assert_valid_key(cls, key):
-        """Raise TypeError if the input is not a valid key."""
-        if not isinstance(key, str):
-            raise TypeError("Keys must be strings.")
-
-    def _assert_valid_size(self, size):
-        """Raise appropriate error if input is not a natural number."""
-        if not isinstance(size, Number):
-            raise TypeError("Size must be a valid integer")
-        elif size < 0 or int(size) != size:
-            raise ValueError("Size must be non negative")
+    def _get_hashes(self, string):
+        """Return a list of each hash applied to the input string."""
+        return [self._get_hash(string + str(i)) for i in self._random_nums]
 
     def _get_hash(self, string):
         """Return the hash of the input string."""
         return hash(string) % self.size
 
-    def _is_full(self):
-        """Return True if the hash map is full, False otherwise."""
-        return self.nitems == self.size
-
-    #TODO: better hash function?
-    def _get_hashes(self, string):
-        """Return a list of each hash applied to the input string."""
-        return [self._get_hash(string + str(i)) for i in self._random_nums]
-
-    def _get_new_random_nums(self):
-        """Generate new random numbers to be used in the hash functions."""
-        return [randint(-1000, 1000) for _ in range(self._num_hashes)]
+    def load(self):
+        """Return the current load of the hash map."""
+        return float(self.nitems) / self.size
