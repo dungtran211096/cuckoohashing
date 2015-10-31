@@ -101,7 +101,7 @@ class MyHash(object):
         """Return the index of key in the array or "not found" if not found."""
         indices = self._get_hashes(key)
         matches = filter(lambda i: self.array[i][0] == key, indices)
-        return self.array[matches[0]][1] if matches else "not found"
+        return matches[0] if matches else "not found"
 
     def load(self):
         """Return the current load of the hash map."""
