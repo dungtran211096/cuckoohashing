@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""This module contains the MyHash class."""
+"""This module contains the CuckooHash class."""
 
 from numbers import Number
 from random import randint
 
 
-class MyHash(object):
+class CuckooHash(object):
     """Custom hash map which handles collisions using Cuckoo Hashing."""
     def __init__(self, size):
         """Initialize hash table of given size."""

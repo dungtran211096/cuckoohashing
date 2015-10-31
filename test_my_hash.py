@@ -1,32 +1,32 @@
 # -*- coding: utf-8 -*-
 import unittest
-from my_hash import MyHash
+from my_hash import CuckooHash
 
 
-class TestMyHashConstruction(unittest.TestCase):
+class TestCuckooHashConstruction(unittest.TestCase):
 	def test_construction_valid_arg(self):
-		self.assertEqual(3, MyHash(3.0).size)
-		self.assertEqual(200, MyHash(200).size)
-		self.assertEqual(0, MyHash(0).size)
-		self.assertEqual(1000, MyHash(1000).size)
+		self.assertEqual(3, CuckooHash(3.0).size)
+		self.assertEqual(200, CuckooHash(200).size)
+		self.assertEqual(0, CuckooHash(0).size)
+		self.assertEqual(1000, CuckooHash(1000).size)
 
 	def test_construction_bad_type(self):
 		with self.assertRaises(TypeError):
-			MyHash('string')
+			CuckooHash('string')
 
 	def test_construction_bad_value(self):
 		with self.assertRaises(ValueError): 
-			MyHash(-1)
+			CuckooHash(-1)
 		with self.assertRaises(ValueError): 
-			MyHash(-1.0)
+			CuckooHash(-1.0)
 		with self.assertRaises(ValueError):
-			MyHash(2.2)
+			CuckooHash(2.2)
 
 
-class TestMyHashSetGet(unittest.TestCase):
+class TestCuckooHashSetGet(unittest.TestCase):
 	def setUp(self):
-		self.small_hash_map = MyHash(20)
-		self.big_hash_map = MyHash(1000)
+		self.small_hash_map = CuckooHash(20)
+		self.big_hash_map = CuckooHash(1000)
 		self.alice_text = open('alice.txt', 'r').read()
 
 	def test_set_get_full(self):
@@ -68,9 +68,9 @@ class TestMyHashSetGet(unittest.TestCase):
 		return [hash_map.get("key" + str(i)) for i in range(nitems)]
 
 
-class TestMyHashDelete(unittest.TestCase):
+class TestCuckooHashDelete(unittest.TestCase):
 	def setUp(self):
-		self.hash_map = MyHash(50)
+		self.hash_map = CuckooHash(50)
 
 	def test_delete_existing(self):
 		self.hash_map.set("somekey", 20)
@@ -81,9 +81,9 @@ class TestMyHashDelete(unittest.TestCase):
 		self.assertIsNone(self.hash_map.delete("somekey"))
 
 
-class TestMyHashLoad(unittest.TestCase):
+class TestCuckooHashLoad(unittest.TestCase):
 	def setUp(self):
-		self.hash_map = MyHash(5)
+		self.hash_map = CuckooHash(5)
 
 	def test_load(self):
 		self.assertEqual(self.hash_map.load(), 0)
