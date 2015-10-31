@@ -15,10 +15,9 @@ class MyHash(object):
         self.nitems = 0
         self.array = [(None, None)] * int(size)
 
-        self._num_hashes = 3
-        self._max_path_size = 20
-        # self._random_nums = self._get_new_random_nums()
-        self._random_nums = [489, 806, -838]
+        self._num_hashes = 8
+        self._max_path_size = size
+        self._random_nums = self._get_new_random_nums()
 
     def set(self, key, value):
         """Set key and value and return True on success, False on failure."""
@@ -50,14 +49,15 @@ class MyHash(object):
 
     def _rehash(self, unset_key, unset_value):
         self._random_nums = self._get_new_random_nums()
-        if not self._set_helper(unset_key, unset_value, 0):
-            self._rehash(unset_key, unset_value)
+        result = self._set_helper(unset_key, unset_value, 0)
+        if result is not True:
+            self._rehash(*result)
         for index, (key, value) in enumerate(self.array):
             if key is not None and index not in self._get_hashes(key):
+                self.array[index] = (None, None)
                 result = self._set_helper(key, value, 0)
                 if result is not True:
                     self._rehash(*result)
-                self.array[index] = (None, None)
 
     def get(self, key):
         """
