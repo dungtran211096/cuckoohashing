@@ -1,5 +1,3 @@
-<snippet>
-  <content><![CDATA[
 ## CuckooHash
 The CuckooHash class implements 5 methods (including the constructor):
 * constructor(size): return an instance of the class with pre-allocated space for the given number of objects.
@@ -10,8 +8,5 @@ The CuckooHash class implements 5 methods (including the constructor):
 
 ## Implementation
 This specific implementation follows that of the original paper (Pugh and Rodler, 2001) except that:
-* only a single table was used, as opposed to one for each hash function in order to keep the code as simple as possible
+* only a single table was used, as opposed to one for each hash function, in order to keep the code as simple as possible
 * 8 hash functions were used instead of 2 to improve performance at higher load factors. This meant that when a new key/value pair was being set, first all 8 hashes were computed and the pair was placed in the first slot that was free. If all of the hashes led to collisions, the pair was placed in the slot corresponding to the first hash, and the process was repeated for the pair that was bumped out of the table.
-]]></content>
-  <tabTrigger>readme</tabTrigger>
-</snippet>
