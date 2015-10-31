@@ -131,7 +131,7 @@ class MyHash(object):
     def _find_array_index(self, key):
         """Return the index of key in the array or "not found" if not found."""
         indices = self._get_hashes(key)
-        matches = filter(lambda i: self.array[i][0] == key, indices)
+        matches = [i for i in indices if self.array[i][0] == key]
         return matches[0] if matches else "not found"
 
     def _get_hashes(self, string):
