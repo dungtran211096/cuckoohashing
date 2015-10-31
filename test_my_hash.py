@@ -53,8 +53,13 @@ class TestMyHashSetGet(unittest.TestCase):
 		self.assertEqual(value, self.big_hash_map.get("list"))
 
 	def test_bad_keys(self):
-		pass
-		# not string key, full hash_map
+		with self.assertRaises(TypeError):
+			self.small_hash_map.set([1], 0)
+			self.small_hash_map.set(10, 20)
+
+	def test_failed_set(self):
+		self._bulk_set(self.small_hash_map, 20)
+		self.assertFalse(self.small_hash_map.set('20th item', 5))
 
 	def _bulk_set(self, hash_map, nitems):
 		return [hash_map.set("key" + str(i), i) for i in range(nitems)]
