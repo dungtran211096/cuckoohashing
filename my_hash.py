@@ -24,7 +24,7 @@ class CuckooHash(object):
         if not isinstance(size, Number):
             raise TypeError("Size must be a valid integer")
         elif size < 0 or int(size) != size:
-            raise ValueError("Size must be non negative")
+            raise ValueError("Size must be a natural number")
 
     def set(self, key, value):
         """Add key value pair and increment number of items in dictionary."""
@@ -34,12 +34,16 @@ class CuckooHash(object):
         """Add key value pair and return True on success, False on failure."""
         self._assert_valid_key(key)
         self._assert_valid_value(value)
+
         if self._is_full():
             return False
         set_result = self._set_helper(key, value, 0)
         if set_result is not True:
             # the set did not succeed, so we rehash the table with new hashes
-            self._rehash(*set_result)
+            try:
+                self._rehash(*set_result)
+            except RuntimeError: # recursive stack limit exceeded
+                return False
         self.nitems += int(increment_nitems)
         return True
 
@@ -79,7 +83,9 @@ class CuckooHash(object):
                 return self._set_helper(slot_key, slot_val, num_iters + 1)
 
     def _add_to_free_slot(self, key, value, array_indices):
-        """Attempt to add key value without moving any previous pairs."""
+        """
+        Attempt to add key value pair and return "success" on sucess and 
+        "failure" if all hashes hashed to an occupied slot."""
         for i in array_indices:
             slot_key, _ = self.array[i]
             # Check if slot is empty or if given key has already been set
@@ -92,9 +98,10 @@ class CuckooHash(object):
     def _rehash(self, unset_key, unset_value):
         """
         Take a key value pair not yet in the dictionary and generate new
-        hash functions until all key value pairs including the input can be
+        hash functions until all key value pairs including the input pair can be
         added to the table without collisions.
         """
+        # generate new hash functions
         self._random_nums = self._get_new_random_nums()
         self._set(unset_key, unset_value, increment_nitems=False)
         for index, (key, value) in enumerate(self.array):
