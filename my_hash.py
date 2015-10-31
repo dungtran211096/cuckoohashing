@@ -3,9 +3,8 @@
 
 from numbers import Number
 from random import randint
-#TODO run linter/make sure style is fine
-#TODO peer review (Rohan)?
-#TODO choose better default value? (or make it variable)
+
+
 class MyHash(object):
     """Custom hash map which handles collisions using Cuckoo Hashing."""
     def __init__(self, size):
@@ -19,7 +18,8 @@ class MyHash(object):
         self._max_path_size = size
         self._random_nums = self._get_new_random_nums()
 
-    def _assert_valid_size(self, size):
+    @classmethod
+    def _assert_valid_size(cls, size):
         """Raise appropriate error if input is not a natural number."""
         if not isinstance(size, Number):
             raise TypeError("Size must be a valid integer")
@@ -40,7 +40,7 @@ class MyHash(object):
         if set_result is not True:
             # the set did not succeed, so we rehash the table with new hashes
             self._rehash(*set_result)
-        self.nitems += 1
+        self.nitems += int(increment_nitems)
         return True
 
     @classmethod
@@ -62,7 +62,7 @@ class MyHash(object):
     def _set_helper(self, key, value, num_iters):
         """
         Recursively try to add key value pair to dictionary in under
-        _max_path_size number of steps, and return True on success and the 
+        _max_path_size number of steps, and return True on success and the
         unset key and value on failure.
         """
         if num_iters > self._max_path_size:
@@ -71,7 +71,7 @@ class MyHash(object):
             array_indices = self._get_hashes(key)
             if self._add_to_free_slot(key, value, array_indices) == "success":
                 return True
-            else: 
+            else:
                 # set the array at the first hash of the key to key value pair
                 # and recursively re set the pair that was bumped out
                 (slot_key, slot_val), self.array[array_indices[0]] = \
@@ -81,17 +81,17 @@ class MyHash(object):
     def _add_to_free_slot(self, key, value, array_indices):
         """Attempt to add key value without moving any previous pairs."""
         for i in array_indices:
-            slot_key, slot_val = self.array[i]
+            slot_key, _ = self.array[i]
             # Check if slot is empty or if given key has already been set
             # to allow overwriting of keys
             if slot_key is None or slot_key == key:
                 self.array[i] = key, value
-                return "success"  
-        return "failure"  
+                return "success"
+        return "failure"
 
     def _rehash(self, unset_key, unset_value):
         """
-        Take a key value pair not yet in the dictionary and generate new 
+        Take a key value pair not yet in the dictionary and generate new
         hash functions until all key value pairs including the input can be
         added to the table without collisions.
         """
