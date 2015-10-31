@@ -2,6 +2,7 @@
 """This module contains the MyHash class."""
 
 from numbers import Number
+from random import randint
 #TODO run linter/make sure style is fine
 #TODO peer review (Rohan)?
 #TODO choose better default value?
@@ -12,19 +13,41 @@ class MyHash(object):
         self._assert_valid_size(size)
         self.size = size
         self.nitems = 0
-        self.array = [None] * int(size)
+        self.array = [(None, None)] * int(size)
+
+        self._num_hashes = 3
+        self._max_path_size = 100
+        self._random_nums = self._get_random_nums()
 
     #TODO: should be able to re set a value with same key
     def set(self, key, value):
         """Set key and value and return True on success, False on failure."""
         self._assert_valid_key(key)
-        index = self._get_hash(key)
-        if self._is_full() or self._already_defined(index):
+        result = self._set_helper(key, value, 0)
+        if result is False:
+            # we couldn't find a free slot after maximum number of iterations
+            self._rehash()
+        return True
+
+    def _set_helper(self, key, value, num_iters):
+        if num_iters > self._max_path_size:
             return False
-        else: # found a spot for the value
-            self.array[index] = value
-            self.nitems += 1
-            return True
+        else:
+            array_indices = self._get_hashes(key)
+            for i in array_indices:
+                slot_key, slot_val = self.array[i]
+                if slot_key is None or slot_key == key: # slot was not taken
+                    self.array[i] = key, value
+                    return True    
+            # slot was taken, push out first slot
+            (slot_key, slot_val), self.array[array_indices[0]] = self.array[arra_indices[0]], (key, value)
+            self._set_helper(slot_key, slot_val, num_iters + 1)
+
+    def _rehash(self):
+        self.hashes = self._get_new_hashes()
+        for key, value in array:
+            if key is not None:
+                self.set(key, value)
 
     def get(self, key):
         """
@@ -79,5 +102,7 @@ class MyHash(object):
 
     #TODO: better hash function?
     def _get_hashes(self, string):
-        return [self._get_hash(string + str(i)) for i in range(3)]
+        return [self._get_hash(string + str(i)) for i in self._random_nums]
 
+    def _get_random_nums(self):
+        return [randint(-1000, 1000) for _ in range(self._num_hashes)]
