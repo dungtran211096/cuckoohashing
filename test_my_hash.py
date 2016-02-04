@@ -101,5 +101,5 @@ class TestCuckooHashLoad(unittest.TestCase):
 		self.hash_map.delete('otherkey')
 		self.assertEqual(self.hash_map.load(), 0)
 
-# if __name__ == '__main__':
-# 	unittest.main()
+if __name__ == '__main__':
+	unittest.main()

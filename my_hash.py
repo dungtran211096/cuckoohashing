@@ -18,8 +18,8 @@ class CuckooHash(object):
         self._max_path_size = size
         self._random_nums = self._get_new_random_nums()
 
-    @classmethod
-    def _assert_valid_size(cls, size):
+    @staticmethod
+    def _assert_valid_size(size):
         """Raise appropriate error if input is not a natural number."""
         if not isinstance(size, Number):
             raise TypeError("Size must be a valid integer")
@@ -47,14 +47,14 @@ class CuckooHash(object):
         self.nitems += int(increment_nitems)
         return True
 
-    @classmethod
-    def _assert_valid_key(cls, key):
+    @staticmethod
+    def _assert_valid_key(key):
         """Raise TypeError if the input is not a valid key."""
         if not isinstance(key, str):
             raise TypeError("Keys must be strings.")
 
-    @classmethod
-    def _assert_valid_value(cls, value):
+    @staticmethod
+    def _assert_valid_value(value):
         """Raise TypeError if value is None."""
         if value is None:
             raise TypeError("dictionary values can't be None.")
